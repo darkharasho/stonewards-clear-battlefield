@@ -1,0 +1,3 @@
+# stonewards-clear-battlefield
+
+A host-only BepInEx mod for Stonewards. It adds a "Clear Battlefield" button to the Esc/pause menu that removes only weapons dropped by enemies. It marks drops when they spawn by using a Harmony hook on the enemy drop path, which records weapon stack netIds in a server-side set. When the button is used, the mod destroys only the tracked stacks that still exist, through Mirror, so all clients stay in sync. Repo layout, build, packaging, tests and the Thunderstore release follow the user's existing mods: stonewards-upgrade-queue, stonewards-mod-settings and stonewards-persistent-multitome.
