@@ -1,25 +1,26 @@
 # ClearBattlefield
 
-Long fights leave the ground covered in weapons that enemies dropped. Open the pause menu and press **Clear Battlefield** in the top-right corner to remove them all at once.
+Long fights leave the ground covered in whatever enemies dropped. Open the pause menu and press **Clear Battlefield** in the top-right corner to remove it all at once.
 
 ## What gets removed
 
-Only weapons that dropped from an enemy you killed. The mod marks each one as it drops, so it never guesses from position or item type afterwards.
+Everything that dropped from an enemy you killed, whatever the item is. The mod marks each drop as it spawns, so it never guesses from position or item type afterwards.
+
+With **Also clear scrap** turned on, scrap still lying on the ground (such as scrap wood from digging) is removed too. That includes scrap from any player's digging.
 
 Everything else stays:
 
-- weapons from the level: chests, rewards, missions, shops, barrels and props
-- weapons a player dropped or threw
-- resources, scrap, tomes and upgrades, and anything else that isn't a weapon
-- an enemy-dropped weapon that merged with a stack a player dropped. The merged stack is kept.
+- items from the level: chests, rewards, missions, shops, barrels and props
+- items a player dropped or threw
+- an enemy drop that merged with a stack a player dropped. The merged stack is kept.
 
-Weapons someone is picking up at that moment are skipped. Marks are forgotten when the run ends.
+Items someone is picking up at that moment are skipped. Marks are forgotten when the run ends.
 
 ## Using it
 
 - The button shows in the pause menu for the host, in levels only.
-- It asks for confirmation first and tells you how many weapons it will remove.
-- Afterwards a notification says how many were cleared. In single player the game is paused, so it appears once you close the menu.
+- It asks for confirmation first and tells you how much it will remove.
+- Afterwards a notification says how much was cleared. In single player the game is paused, so it appears once you close the menu.
 - You can also bind a key to it (none by default).
 
 ## Multiplayer
@@ -33,7 +34,8 @@ Edit in r2modman under **Config editor** → `com.darkharasho.stonewards.clearba
 | Setting | Default | Description |
 | --- | --- | --- |
 | General → RequireConfirmation | `true` | Ask before removing. Applies to the button and the keybind. |
-| General → MinDropAgeSeconds | `0` | Leave weapons that dropped less than this many seconds ago. |
+| General → MinDropAgeSeconds | `0` | Leave enemy drops newer than this many seconds. `0` clears them all. Doesn't apply to scrap. |
+| General → ClearScrap | `false` | Also remove scrap left on the ground. |
 | Controls → ClearKey | none | Clears the battlefield. With confirmation on, it opens the pause menu on the confirmation. |
 
 ## Issues

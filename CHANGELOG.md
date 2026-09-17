@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Clears everything enemies dropped, not only weapons.
+- New setting **Also clear scrap** (off by default) removes scrap, such as scrap wood from digging, left on the ground.
+- Fixed the pause menu button never appearing, which also stopped the keybind from working.
+
 ## 0.1.0
 
 - First release. A Clear Battlefield button in the top-right of the pause menu removes weapons dropped by enemies, for the host only.

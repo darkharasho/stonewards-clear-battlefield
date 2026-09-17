@@ -117,16 +117,19 @@ namespace ClearBattlefield.Tests
         }
 
         [Theory]
-        [InlineData(0, "No dropped weapons to clear")]
-        [InlineData(1, "Cleared 1 dropped weapon")]
-        [InlineData(37, "Cleared 37 dropped weapons")]
-        public void ResultText(int count, string expected) => Assert.Equal(expected, ClearText.Result(count));
+        [InlineData(0, 0, "Nothing to clear")]
+        [InlineData(1, 0, "Cleared 1 enemy drop")]
+        [InlineData(37, 0, "Cleared 37 enemy drops")]
+        [InlineData(0, 1, "Cleared 1 piece of scrap")]
+        [InlineData(5, 3, "Cleared 5 enemy drops and 3 pieces of scrap")]
+        public void ResultText(int drops, int scrap, string expected) =>
+            Assert.Equal(expected, ClearText.Result(drops, scrap));
 
         [Fact]
-        public void ConfirmationTextNamesCount()
+        public void ConfirmationTextNamesCounts()
         {
-            Assert.Contains("12 dropped weapons", ClearText.Confirmation(12));
-            Assert.Contains("no weapons", ClearText.Confirmation(0));
+            Assert.Contains("12 enemy drops and 2 pieces of scrap", ClearText.Confirmation(12, 2));
+            Assert.Contains("nothing on the ground", ClearText.Confirmation(0, 0));
         }
     }
 }

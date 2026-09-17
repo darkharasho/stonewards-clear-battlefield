@@ -15,7 +15,7 @@ namespace ClearBattlefield
     }
 
     /// <summary>
-    /// Server-side record of weapons spawned by enemy drops, keyed by Mirror netId with the time each one spawned.
+    /// Server-side record of items spawned by enemy drops, keyed by Mirror netId with the time each one spawned.
     /// Knows nothing about Unity so it can be unit tested; the patches feed it.
     /// </summary>
     public sealed class DropTracker

@@ -30,7 +30,9 @@ namespace ClearBattlefield.Patches
         {
             var settingsButton = SettingsButton(menu);
             var root = menu.GetComponent<UIDocument>()?.rootVisualElement;
-            if (settingsButton == null || root == null || ConfirmationPopup(menu) == null)
+            // UIConfirmationPopup is a BaseMenu the game news up instead of adding as a component, so Unity's == null
+            // always reports it as destroyed. Compare references instead.
+            if (settingsButton == null || root == null || ReferenceEquals(ConfirmationPopup(menu), null))
             {
                 Plugin.Log.LogWarning("Pause menu layout not recognised; the Clear Battlefield button was not added");
                 return;
@@ -101,22 +103,22 @@ namespace ClearBattlefield.Patches
         private static void ShowConfirmation()
         {
             var popup = ConfirmationPopup(_menu);
-            var count = BattlefieldClearer.CountClearable();
+            var (drops, scrap) = BattlefieldClearer.CountClearable();
             SetNavigable(_menu, false);
-            if (count == 0)
+            if (drops + scrap == 0)
             {
                 // One-button form; its OK button just hides the popup.
-                popup.Show(ClearText.Confirmation(0), "OK", _button);
+                popup.Show(ClearText.Confirmation(0, 0), "OK", _button);
                 popup.Root?.schedule.Execute(RestoreWhenClosed).Every(100).Until(() => !popup.IsOpen);
                 return;
             }
-            popup.Show(ClearText.Confirmation(count), "Clear", "Cancel", _button, OnConfirm, OnCancel);
+            popup.Show(ClearText.Confirmation(drops, scrap), "Clear", "Cancel", _button, OnConfirm, OnCancel);
         }
 
         private static void RestoreWhenClosed()
         {
             var popup = _menu != null ? ConfirmationPopup(_menu) : null;
-            if (popup != null && !popup.IsOpen && _menu.IsPauseMenuOpen)
+            if (!ReferenceEquals(popup, null) && !popup.IsOpen && _menu.IsPauseMenuOpen)
                 SetNavigable(_menu, true);
         }
 

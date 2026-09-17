@@ -1,11 +1,11 @@
 ## Project Context
 
-A host-only BepInEx mod for Stonewards. It adds a "Clear Battlefield" button to the Esc/pause menu that removes only weapons dropped by enemies. It marks drops when they spawn by using a Harmony hook on the enemy drop path, which records weapon stack netIds in a server-side set. When the button is used, the mod destroys only the tracked stacks that still exist, through Mirror, so all clients stay in sync. Repo layout, build, packaging, tests and the Thunderstore release follow the user's existing mods: stonewards-upgrade-queue, stonewards-mod-settings and stonewards-persistent-multitome.
+A host-only BepInEx mod for Stonewards. It adds a "Clear Battlefield" button to the Esc/pause menu that removes items dropped by enemies (any type; weapons-only was dropped at the user's request in 0.2.0) and, with an opt-in setting, leftover scrap (ScrapPickableItem). It marks drops when they spawn by using a Harmony hook on the enemy drop path, which records weapon stack netIds in a server-side set. When the button is used, the mod destroys only the tracked stacks that still exist, through Mirror, so all clients stay in sync. Repo layout, build, packaging, tests and the Thunderstore release follow the user's existing mods: stonewards-upgrade-queue, stonewards-mod-settings and stonewards-persistent-multitome.
 
 ## Goals
 
 - Research phase first: decompile Assembly-CSharp.dll with ilspycmd (DOTNET_ROOT set; older decompile may be in /tmp/sw), then report back before writing any code. The report covers: the exact method where enemies spawn drops (around EnemyController's DropItemChance roll, ItemDropPoolSO and RarityDropRateSO) and whether weapons use a different path; how weapons are detected (ItemDataSO or WeaponDataSO); how stacks are tracked and cleared, including merges and pickups; how the button is added to the pause menu (UIPauseMenu, BaseMenu); and any open questions
-- Harmony-hook the enemy drop spawn path, possibly PickupItemStack.ServerInit, and record the spawned stack's netId in a server-side set, only when the item is a weapon
+- Harmony-hook the enemy drop spawn path, possibly PickupItemStack.ServerInit, and record the spawned stack's netId in a server-side set, for every item type
 - Never guess from position or item type afterwards. Everything else on the ground must stay: weapons from the level or map (pedestals, rewards, missions, shops, chests), weapons dropped by players, resources, scrap, upgrade or tome pickups (PickupUpgradeItemDataSO) and storage (StorageItemStack)
 - Remove IDs from the set when a stack is picked up or despawned, and clear the set when the level changes or the run ends
 - Find out how the game handles an enemy-dropped stack merging with a player-dropped or placed stack, report it, and pick the safe option: keep the stack (untrack it)
@@ -20,7 +20,7 @@ A host-only BepInEx mod for Stonewards. It adds a "Clear Battlefield" button to 
 
 - Picking up, auto-collecting or merging items
 - Changing drop rates
-- Clearing anything that isn't an enemy-dropped weapon
+- Clearing anything that isn't an enemy drop or, with ClearScrap on, leftover scrap
 - Client-side install requirement (host-only mod)
 
 ## Suggested stack

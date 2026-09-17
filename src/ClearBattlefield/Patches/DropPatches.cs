@@ -13,7 +13,7 @@ namespace ClearBattlefield.Patches
     {
         private static void Postfix(PickableItem __result)
         {
-            if (__result == null || !NetworkServer.active || !(__result.ItemDataSO is WeaponDataSO))
+            if (__result == null || !NetworkServer.active)
                 return;
             BattlefieldClearer.Tracker.Track(__result.netId, BattlefieldClearer.Now);
         }

@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
 namespace ClearBattlefield
 {
-    /// <summary>Owns the server's <see cref="DropTracker"/> and removes tracked weapons through Mirror.</summary>
+    /// <summary>Owns the server's <see cref="DropTracker"/> and removes tracked enemy drops, and optionally scrap, through Mirror.</summary>
     internal static class BattlefieldClearer
     {
         public static readonly DropTracker Tracker = new DropTracker();
@@ -23,36 +24,75 @@ namespace ClearBattlefield
                 Plugin.Log.LogInfo($"{reason}; forgot {count} tracked drop(s)");
         }
 
-        /// <summary>How many tracked weapons a clear would remove right now.</summary>
-        public static int CountClearable() =>
-            NetworkServer.active ? Tracker.SelectClearable(Now, MinAge, StateOf).Count : 0;
+        /// <summary>How many enemy drops and pieces of scrap a clear would remove right now.</summary>
+        public static (int drops, int scrap) CountClearable()
+        {
+            if (!NetworkServer.active)
+                return (0, 0);
+            return (Tracker.SelectClearable(Now, MinAge, StateOf).Count, ScrapOnGround().Count);
+        }
 
         public static int Clear()
         {
             if (!NetworkServer.active)
                 return 0;
 
-            var removed = 0;
+            // Collect scrap before destroying anything, since destroying changes NetworkServer.spawned.
+            var scrap = ScrapOnGround();
+            var drops = 0;
             foreach (var netId in Tracker.SelectClearable(Now, MinAge, StateOf))
             {
-                if (!NetworkServer.spawned.TryGetValue(netId, out var identity) || identity == null)
-                    continue;
-                try
-                {
-                    // Same call the game uses to remove picked-up and merged items; clients are told to destroy it too.
-                    NetworkServer.Destroy(identity.gameObject);
-                    removed++;
-                }
-                catch (Exception ex)
-                {
-                    Plugin.Log.LogError($"Could not remove dropped weapon {netId}: {ex}");
-                }
+                if (Destroy(netId))
+                    drops++;
                 Tracker.Untrack(netId);
             }
+            var scrapRemoved = 0;
+            foreach (var netId in scrap)
+            {
+                if (Destroy(netId))
+                    scrapRemoved++;
+            }
 
-            Plugin.Log.LogInfo($"Cleared {removed} dropped weapon(s); {Tracker.Count} still tracked");
-            Notify(ClearText.Result(removed));
-            return removed;
+            Plugin.Log.LogInfo($"Cleared {drops} enemy drop(s) and {scrapRemoved} scrap; {Tracker.Count} drop(s) still tracked");
+            Notify(ClearText.Result(drops, scrapRemoved));
+            return drops + scrapRemoved;
+        }
+
+        private static bool Destroy(uint netId)
+        {
+            if (!NetworkServer.spawned.TryGetValue(netId, out var identity) || identity == null)
+                return false;
+            try
+            {
+                // Same call the game uses to remove picked-up and merged items; clients are told to destroy it too.
+                NetworkServer.Destroy(identity.gameObject);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"Could not remove item {netId}: {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Scrap on the ground when <see cref="Plugin.ClearScrap"/> is on. Scrap only spawns from digging (players take the
+        /// produced resource, never the scrap itself), so any ScrapPickableItem not being picked up is leftover scrap.
+        /// Enemy drops are left to the tracker so they aren't counted twice.
+        /// </summary>
+        private static List<uint> ScrapOnGround()
+        {
+            var result = new List<uint>();
+            if (!Plugin.ClearScrap.Value)
+                return result;
+            foreach (var identity in NetworkServer.spawned.Values)
+            {
+                if (identity == null || !identity.TryGetComponent<ScrapPickableItem>(out var scrap) || scrap == null)
+                    continue;
+                if (scrap.NetworkSyncPlayerID == 0 && !Tracker.IsTracked(identity.netId))
+                    result.Add(identity.netId);
+            }
+            return result;
         }
 
         private static double MinAge => Math.Max(0f, Plugin.MinDropAgeSeconds.Value);
