@@ -11,11 +11,13 @@ namespace ClearBattlefield
     {
         public const string PluginGuid = "com.darkharasho.stonewards.clearbattlefield";
         public const string PluginName = "ClearBattlefield";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "0.3.0";
 
         internal static ManualLogSource Log;
         internal static ConfigEntry<bool> RequireConfirmation;
         internal static ConfigEntry<KeyboardShortcut> ClearKey;
+        internal static ConfigEntry<KeyboardShortcut> ClearDropsKey;
+        internal static ConfigEntry<KeyboardShortcut> ClearScrapKey;
         internal static ConfigEntry<float> MinDropAgeSeconds;
         internal static ConfigEntry<bool> ClearScrap;
 
@@ -37,8 +39,14 @@ namespace ClearBattlefield
                 "Also remove scrap (such as scrap wood from digging) that is still on the ground. It could have come from any player's digging.", null,
                 new ConfigurationManagerAttributes { DispName = "Also clear scrap", Order = 5 }));
             ClearKey = Config.Bind("Controls", "ClearKey", KeyboardShortcut.Empty, new ConfigDescription(
-                "Key that clears the battlefield. With confirmation on, it opens the pause menu on the confirmation. Host only; none by default.", null,
-                new ConfigurationManagerAttributes { DispName = "Clear battlefield" }));
+                "Key that clears the battlefield: enemy drops, plus scrap if \"Also clear scrap\" is on. With confirmation on, it opens the pause menu on the confirmation. Host only; none by default.", null,
+                new ConfigurationManagerAttributes { DispName = "Clear battlefield", Order = 30 }));
+            ClearDropsKey = Config.Bind("Controls", "ClearDropsKey", KeyboardShortcut.Empty, new ConfigDescription(
+                "Key that clears enemy drops only, never scrap. Host only; none by default.", null,
+                new ConfigurationManagerAttributes { DispName = "Clear enemy drops", Order = 20 }));
+            ClearScrapKey = Config.Bind("Controls", "ClearScrapKey", KeyboardShortcut.Empty, new ConfigDescription(
+                "Key that clears scrap only, such as scrap wood from digging. It works whether or not \"Also clear scrap\" is on. Host only; none by default.", null,
+                new ConfigurationManagerAttributes { DispName = "Clear scrap", Order = 10 }));
 
             _harmony = new Harmony(PluginGuid);
             _harmony.PatchAll(typeof(Plugin).Assembly);
@@ -47,8 +55,13 @@ namespace ClearBattlefield
 
         private void Update()
         {
+            // One clear per frame; a key bound to two actions only runs the first.
             if (Hotkey.WasPressed(ClearKey.Value))
-                PauseMenuButton.OnHotkey();
+                PauseMenuButton.OnHotkey(drops: true, scrap: ClearScrap.Value);
+            else if (Hotkey.WasPressed(ClearDropsKey.Value))
+                PauseMenuButton.OnHotkey(drops: true, scrap: false);
+            else if (Hotkey.WasPressed(ClearScrapKey.Value))
+                PauseMenuButton.OnHotkey(drops: false, scrap: true);
             PauseMenuButton.Update();
         }
 

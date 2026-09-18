@@ -10,6 +10,8 @@ namespace ClearBattlefield
     {
         public static readonly DropTracker Tracker = new DropTracker();
 
+        private static readonly List<uint> EmptyIds = new List<uint>();
+
         public static double Now => Time.realtimeSinceStartupAsDouble;
 
         /// <summary>Host or single player, inside a level. Enemies only drop items in levels.</summary>
@@ -24,23 +26,23 @@ namespace ClearBattlefield
                 Plugin.Log.LogInfo($"{reason}; forgot {count} tracked drop(s)");
         }
 
-        /// <summary>How many enemy drops and pieces of scrap a clear would remove right now.</summary>
-        public static (int drops, int scrap) CountClearable()
+        /// <summary>How many enemy drops and pieces of scrap a clear of the given scope would remove right now.</summary>
+        public static (int drops, int scrap) CountClearable(bool includeDrops, bool includeScrap)
         {
             if (!NetworkServer.active)
                 return (0, 0);
-            return (Tracker.SelectClearable(Now, MinAge, StateOf).Count, ScrapOnGround().Count);
+            return (includeDrops ? Tracker.SelectClearable(Now, MinAge, StateOf).Count : 0, ScrapOnGround(includeScrap).Count);
         }
 
-        public static int Clear()
+        public static int Clear(bool includeDrops, bool includeScrap)
         {
             if (!NetworkServer.active)
                 return 0;
 
             // Collect scrap before destroying anything, since destroying changes NetworkServer.spawned.
-            var scrap = ScrapOnGround();
+            var scrap = ScrapOnGround(includeScrap);
             var drops = 0;
-            foreach (var netId in Tracker.SelectClearable(Now, MinAge, StateOf))
+            foreach (var netId in includeDrops ? Tracker.SelectClearable(Now, MinAge, StateOf) : EmptyIds)
             {
                 if (Destroy(netId))
                     drops++;
@@ -76,14 +78,14 @@ namespace ClearBattlefield
         }
 
         /// <summary>
-        /// Scrap on the ground when <see cref="Plugin.ClearScrap"/> is on. Scrap only spawns from digging (players take the
+        /// Scrap on the ground, when the clear includes it. Scrap only spawns from digging (players take the
         /// produced resource, never the scrap itself), so any ScrapPickableItem not being picked up is leftover scrap.
         /// Enemy drops are left to the tracker so they aren't counted twice.
         /// </summary>
-        private static List<uint> ScrapOnGround()
+        private static List<uint> ScrapOnGround(bool include)
         {
             var result = new List<uint>();
-            if (!Plugin.ClearScrap.Value)
+            if (!include)
                 return result;
             foreach (var identity in NetworkServer.spawned.Values)
             {

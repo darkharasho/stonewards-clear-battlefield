@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- Two new keybinds next to the existing one: **Clear enemy drops** removes enemy drops only, **Clear scrap** removes scrap only. The scrap keybind works whether or not **Also clear scrap** is on.
+- The original **Clear battlefield** keybind and the pause menu button are unchanged: enemy drops, plus scrap when **Also clear scrap** is on.
+
 ## 0.2.0
 
 - Clears everything enemies dropped, not only weapons.

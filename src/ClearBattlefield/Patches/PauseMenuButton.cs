@@ -26,6 +26,10 @@ namespace ClearBattlefield.Patches
         private static UIPauseMenu _menu;
         private static Button _button;
 
+        /// <summary>What the confirmation currently open is about to clear.</summary>
+        private static bool _pendingDrops;
+        private static bool _pendingScrap;
+
         public static void Attach(UIPauseMenu menu)
         {
             var settingsButton = SettingsButton(menu);
@@ -67,14 +71,14 @@ namespace ClearBattlefield.Patches
                 _button.style.display = display;
         }
 
-        /// <summary>The keybind: clear straight away, or open the pause menu on the confirmation.</summary>
-        public static void OnHotkey()
+        /// <summary>A keybind: clear straight away, or open the pause menu on the confirmation.</summary>
+        public static void OnHotkey(bool drops, bool scrap)
         {
             if (!BattlefieldClearer.Available)
                 return;
             if (!Plugin.RequireConfirmation.Value)
             {
-                BattlefieldClearer.Clear();
+                BattlefieldClearer.Clear(drops, scrap);
                 return;
             }
 
@@ -86,7 +90,7 @@ namespace ClearBattlefield.Patches
                 menu.OpenMenu(_Show: true);
             else if (state != InputManager.InputState.PauseMenu || !PlayButton(menu).focusable)
                 return;
-            ShowConfirmation();
+            ShowConfirmation(drops, scrap);
         }
 
         private static void OnClick()
@@ -95,15 +99,17 @@ namespace ClearBattlefield.Patches
                 return;
             AudioManager.Instance?.PlayUIButton();
             if (Plugin.RequireConfirmation.Value)
-                ShowConfirmation();
+                ShowConfirmation(true, Plugin.ClearScrap.Value);
             else
-                BattlefieldClearer.Clear();
+                BattlefieldClearer.Clear(true, Plugin.ClearScrap.Value);
         }
 
-        private static void ShowConfirmation()
+        private static void ShowConfirmation(bool includeDrops, bool includeScrap)
         {
             var popup = ConfirmationPopup(_menu);
-            var (drops, scrap) = BattlefieldClearer.CountClearable();
+            var (drops, scrap) = BattlefieldClearer.CountClearable(includeDrops, includeScrap);
+            _pendingDrops = includeDrops;
+            _pendingScrap = includeScrap;
             SetNavigable(_menu, false);
             if (drops + scrap == 0)
             {
@@ -127,7 +133,7 @@ namespace ClearBattlefield.Patches
             // Unlike the game's own confirmations, this one leaves the pause menu open.
             ConfirmationPopup(_menu).Hide();
             SetNavigable(_menu, true);
-            BattlefieldClearer.Clear();
+            BattlefieldClearer.Clear(_pendingDrops, _pendingScrap);
         }
 
         private static void OnCancel()

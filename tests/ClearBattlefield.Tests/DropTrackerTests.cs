@@ -131,5 +131,15 @@ namespace ClearBattlefield.Tests
             Assert.Contains("12 enemy drops and 2 pieces of scrap", ClearText.Confirmation(12, 2));
             Assert.Contains("nothing on the ground", ClearText.Confirmation(0, 0));
         }
+
+        /// <summary>The drops-only and scrap-only keybinds count one side as zero; it must not be mentioned.</summary>
+        [Fact]
+        public void SingleScopeTextLeavesOutTheOtherSide()
+        {
+            Assert.Equal("Remove 4 enemy drops? Everything else on the ground stays.", ClearText.Confirmation(4, 0));
+            Assert.Equal("Remove 4 pieces of scrap? Everything else on the ground stays.", ClearText.Confirmation(0, 4));
+            Assert.DoesNotContain("scrap", ClearText.Result(4, 0));
+            Assert.DoesNotContain("enemy", ClearText.Result(0, 4));
+        }
     }
 }

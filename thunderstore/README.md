@@ -21,7 +21,7 @@ Items someone is picking up at that moment are skipped. Marks are forgotten when
 - The button shows in the pause menu for the host, in levels only.
 - It asks for confirmation first and tells you how much it will remove.
 - Afterwards a notification says how much was cleared. In single player the game is paused, so it appears once you close the menu.
-- You can also bind a key to it (none by default).
+- You can also bind keys (none by default): one for the same clear as the button, one for enemy drops only and one for scrap only. The scrap key works whether or not **Also clear scrap** is on, so you can leave that setting off and clear wood on demand.
 
 ## Multiplayer
 
@@ -36,7 +36,9 @@ Edit in r2modman under **Config editor** → `com.darkharasho.stonewards.clearba
 | General → RequireConfirmation | `true` | Ask before removing. Applies to the button and the keybind. |
 | General → MinDropAgeSeconds | `0` | Leave enemy drops newer than this many seconds. `0` clears them all. Doesn't apply to scrap. |
 | General → ClearScrap | `false` | Also remove scrap left on the ground. |
-| Controls → ClearKey | none | Clears the battlefield. With confirmation on, it opens the pause menu on the confirmation. |
+| Controls → ClearKey | none | Clears the battlefield: enemy drops, plus scrap if ClearScrap is on. With confirmation on, it opens the pause menu on the confirmation. |
+| Controls → ClearDropsKey | none | Clears enemy drops only, never scrap. |
+| Controls → ClearScrapKey | none | Clears scrap only. Works whether or not ClearScrap is on. |
 
 ## Issues
 

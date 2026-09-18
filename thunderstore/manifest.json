@@ -1,6 +1,6 @@
 {
     "name": "ClearBattlefield",
-    "version_number": "0.2.0",
+    "version_number": "0.3.0",
     "website_url": "https://github.com/darkharasho/stonewards-clear-battlefield",
     "description": "Adds a Clear Battlefield button to the pause menu that removes everything enemies dropped, and optionally leftover scrap. Level loot, player drops and everything else stay. Host only.",
     "dependencies": [
