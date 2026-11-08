@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- The keybinds now work while you're moving or holding other keys. Before, pressing one while holding W, Shift or any other key did nothing.
+
 ## 0.3.0
 
 - Two new keybinds next to the existing one: **Clear enemy drops** removes enemy drops only, **Clear scrap** removes scrap only. The scrap keybind works whether or not **Also clear scrap** is on.

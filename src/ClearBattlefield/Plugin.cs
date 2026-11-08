@@ -11,7 +11,7 @@ namespace ClearBattlefield
     {
         public const string PluginGuid = "com.darkharasho.stonewards.clearbattlefield";
         public const string PluginName = "ClearBattlefield";
-        public const string PluginVersion = "0.3.0";
+        public const string PluginVersion = "0.3.1";
 
         internal static ManualLogSource Log;
         internal static ConfigEntry<bool> RequireConfirmation;
